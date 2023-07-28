@@ -64,6 +64,18 @@
 </template>
   
 <script>
+const getBase64StringFromDataURL = (dataURL) =>
+    dataURL.replace('data:', '').replace(/^.+,/, '');
+
+function dataURItoBlob(dataURI) {
+    var binary = atob(dataURI.split(',')[1]);
+    var array = [];
+    for (var i = 0; i < binary.length; i++) {
+        array.push(binary.charCodeAt(i));
+    }
+    return new Blob([new Uint8Array(array)], { type: 'image/jpeg' });
+}
+
 export default {
     name: 'App',
     data() {
@@ -92,7 +104,7 @@ export default {
                 this.createCameraElement();
             }
 
-            this.bill = {loading:true}
+            this.bill = { loading: true }
         },
         toggleCameraType() {
             if (
@@ -162,13 +174,17 @@ export default {
             const download = document.getElementById('downloadPhoto');
             const image = document
                 .getElementById('photoTaken')
-                .toDataURL('image/jpeg')
+                .toDataURL('image/png')//.replace('data:image/png;base64,', '')
+
+            // const base64 = getBase64StringFromDataURL(image);
+            const blob = dataURItoBlob(image)
+
             fetch("/api/parse", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "image/jpeg"
-                },
-                body: image
+                // headers: {
+                //     "Content-Type": "image/png"
+                // },
+                body: blob,
             }).then((res) => {
                 console.log("Image uploaded successfully!")
                 res.json().then((data) => {
@@ -220,8 +236,8 @@ body {
 }
 
 .center {
-  margin-left: auto;
-  margin-right: auto;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 

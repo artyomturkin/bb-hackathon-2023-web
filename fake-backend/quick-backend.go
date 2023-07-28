@@ -5,16 +5,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 )
 
 func main() {
-	u, _ := url.Parse("http://localhost:5173")
-	p := httputil.NewSingleHostReverseProxy(u)
-	http.Handle("/", p)
+	// u, _ := url.Parse("http://localhost:5173")
+	// p := httputil.NewSingleHostReverseProxy(u)
+	// http.Handle("/", p)
 	http.HandleFunc("/api/parse", demoHandler)
-	http.ListenAndServe("localhost:3003", nil)
+	http.ListenAndServe(":3003", nil)
 }
 
 func demoHandler(w http.ResponseWriter, r *http.Request) {
