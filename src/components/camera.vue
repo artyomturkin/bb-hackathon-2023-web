@@ -20,10 +20,12 @@
             <div v-if="isCameraOpen" v-show="!isLoading" class="camera-box" :class="{ flash: isShotPhoto }">
                 <div class="camera-shutter" :class="{ flash: isShotPhoto }"></div>
 
-                <video v-show="!isPhotoTaken" ref="camera" :width="450" :height="337.5" webkit-playsinline playsinline
-                    autoplay></video>
+                <video v-show="!isPhotoTaken" ref="camera" :width="450" :height="337.5" webkit-playsinline playsinline autoplay></video>
+                <!-- <video v-show="!isPhotoTaken" ref="camera" :width="450" :height="337.5" webkit-playsinline playsinline autoplay></video> -->
 
+                <!-- <canvas v-show="isPhotoTaken" id="photoTaken" ref="canvas" :width="450" :height="337.5"></canvas> -->
                 <canvas v-show="isPhotoTaken" id="photoTaken" ref="canvas" :width="450" :height="337.5"></canvas>
+                <canvas v-show="false" id="photoTaken" ref="canvasxl" :width="2048" :height="2048"></canvas>
             </div>
 
             <div style="display:inline-block;">
@@ -45,7 +47,9 @@
                 </div>
             </div>
         </div>
-        <div class="bill" v-if="!bill.loading">
+        <Preloader v-if="bill.loading" color="green" scale=0.6 />
+        <p v-if="error" style="color: brown;">{{ error }}</p>
+        <div class="bill" v-if="bill.loaded">
             <p>Итого {{ bill.Total }} тг.</p>
             <hr />
             <table>
@@ -64,6 +68,8 @@
 </template>
   
 <script>
+import Preloader from './Preloader.vue'
+
 const getBase64StringFromDataURL = (dataURL) =>
     dataURL.replace('data:', '').replace(/^.+,/, '');
 
@@ -78,6 +84,9 @@ function dataURItoBlob(dataURI) {
 
 export default {
     name: 'App',
+    components: {
+        Preloader,
+    },
     data() {
         return {
             isCameraOpen: false,
@@ -87,8 +96,9 @@ export default {
             cameraType: 'environment',
             link: '#',
             bill: {
-                loading: true,
+                loading: false,
             },
+            error: null,
         };
     },
 
@@ -104,7 +114,8 @@ export default {
                 this.createCameraElement();
             }
 
-            this.bill = { loading: true }
+            this.bill = { loading: false }
+            this.error = null
         },
         toggleCameraType() {
             if (
@@ -166,8 +177,11 @@ export default {
 
             this.isPhotoTaken = !this.isPhotoTaken;
 
+            const contextxl = this.$refs.canvasxl.getContext('2d');
+            contextxl.drawImage(this.$refs.camera, 0, 0, 2048, 2048);
+
             const context = this.$refs.canvas.getContext('2d');
-            context.drawImage(this.$refs.camera, 0, 0, 450, 337.5);
+            context.drawImage(this.$refs.canvasxl, 0, 0, 450, 337.5);
         },
 
         downloadImage() {
@@ -179,6 +193,9 @@ export default {
             // const base64 = getBase64StringFromDataURL(image);
             const blob = dataURItoBlob(image)
 
+            this.bill = { loading: true }
+            this.toggleCamera()
+
             fetch("/api/parse", {
                 method: "POST",
                 // headers: {
@@ -189,10 +206,14 @@ export default {
                 console.log("Image uploaded successfully!")
                 res.json().then((data) => {
                     this.bill = data
+                    this.bill.loaded = true
                     console.log(data)
+                }).catch(error => {
+                    this.error = error;
+                    console.log(error);
                 })
-                this.toggleCamera()
             }).catch(error => {
+                this.error = error;
                 console.log(error);
             });
         },
