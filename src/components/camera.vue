@@ -20,12 +20,12 @@
             <div v-if="isCameraOpen" v-show="!isLoading" class="camera-box" :class="{ flash: isShotPhoto }">
                 <div class="camera-shutter" :class="{ flash: isShotPhoto }"></div>
 
-                <video v-show="!isPhotoTaken" ref="camera" :width="450" :height="337.5" webkit-playsinline playsinline autoplay></video>
+                <video v-show="!isPhotoTaken" ref="camera" :height="1600" :width="1200" webkit-playsinline playsinline autoplay></video>
                 <!-- <video v-show="!isPhotoTaken" ref="camera" :width="450" :height="337.5" webkit-playsinline playsinline autoplay></video> -->
 
                 <!-- <canvas v-show="isPhotoTaken" id="photoTaken" ref="canvas" :width="450" :height="337.5"></canvas> -->
-                <canvas v-show="isPhotoTaken" id="photoTaken" ref="canvas" :width="450" :height="337.5"></canvas>
-                <canvas v-show="false" id="photoTaken" ref="canvasxl" :width="2048" :height="2048"></canvas>
+                <canvas v-show="isPhotoTaken" id="photoTaken" ref="canvas" :height="1600" :width="1200"></canvas>
+                <canvas v-show="false" id="photoTaken" ref="canvasxl" :height="1600" :width="1200"></canvas>
             </div>
 
             <div style="display:inline-block;">
@@ -49,7 +49,7 @@
         </div>
         <Preloader v-if="bill.loading" color="green" scale=0.6 />
         <p v-if="error" style="color: brown;">{{ error }}</p>
-        <div class="bill" v-if="bill.loaded">
+        <div class="bill" v-if="bill.loaded" style="justify-content: center;">
             <p>Итого {{ bill.Total }} тг.</p>
             <hr />
             <table>
@@ -178,10 +178,10 @@ export default {
             this.isPhotoTaken = !this.isPhotoTaken;
 
             const contextxl = this.$refs.canvasxl.getContext('2d');
-            contextxl.drawImage(this.$refs.camera, 0, 0, 2048, 2048);
+            contextxl.drawImage(this.$refs.camera, 0, 0, 1200, 1600 );
 
             const context = this.$refs.canvas.getContext('2d');
-            context.drawImage(this.$refs.canvasxl, 0, 0, 450, 337.5);
+            context.drawImage(this.$refs.canvasxl, 0, 0, 1200, 1600 );
         },
 
         downloadImage() {
